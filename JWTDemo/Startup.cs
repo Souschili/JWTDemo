@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -10,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace JWTDemo
 {
@@ -25,6 +28,39 @@ namespace JWTDemo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // по хорошему это надо вынести либо в статик класс ,либо в аппсетинг 
+            #region
+            // security key
+            var security_key = "this_is_very_powerfull_secret_key_2019";
+
+            // symetrick security key
+            var symetrickSecKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(security_key));
+
+            // singing credentials
+            var singingcredentials = new SigningCredentials(symetrickSecKey, SecurityAlgorithms.HmacSha256);
+            #endregion
+
+            //добавим валидацию токена
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
+                AddJwtBearer( options=> {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        // что будем валидировать
+                        ValidateIssuer=true,
+                        ValidateAudience=true,
+                        ValidateIssuerSigningKey=true,
+                        // правильные парметры,с чем сравнивать
+                        ValidAudience= "http://www.evil.org",
+                        ValidIssuer= "http://www.evil.org",
+                        IssuerSigningKey=symetrickSecKey,
+
+
+
+                    };
+
+                });
+
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
@@ -42,6 +78,7 @@ namespace JWTDemo
             }
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseMvc();
         }
     }
