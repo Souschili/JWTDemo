@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace JWTDemo.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Roles ="Lord")]
     [ApiController]
     public class ValuesController : ControllerBase
     {

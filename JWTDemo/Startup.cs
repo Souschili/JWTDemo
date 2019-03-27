@@ -50,7 +50,7 @@ namespace JWTDemo
                         ValidateAudience=true,
                         ValidateIssuerSigningKey=true,
                         // правильные парметры,с чем сравнивать
-                        ValidAudience= "http://www.evil.org",
+                        ValidAudience= "evil_user",
                         ValidIssuer= "http://www.evil.org",
                         IssuerSigningKey=symetrickSecKey,
 
